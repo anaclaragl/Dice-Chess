@@ -8,6 +8,8 @@ public class DiceRoll : MonoBehaviour
 
     [SerializeField] private float forceX, forceY, forceZ;
 
+    private KeyCode keyToRoll = KeyCode.E;
+
     public int diceFaceNum;
 
     private void Awake()
@@ -15,24 +17,28 @@ public class DiceRoll : MonoBehaviour
         Initialize();
     }
 
+    private bool IsDiceAtRest() =>
+    body.GetComponent<Rigidbody>().linearVelocity == Vector3.zero;
+
+    private bool IsClickedOnSelf()
+    {
+        if (!Input.GetMouseButtonDown(0)) return false;
+
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        return Physics.Raycast(ray, out RaycastHit hit) && hit.collider.gameObject.name == gameObject.name;
+
+    }
+
     // Update is called once per frame
     private void Update()
     {
-        if (body != null)
         {
-            if (Input.GetMouseButtonDown(0) && body.GetComponent<Rigidbody>().linearVelocity == Vector3.zero)
-            {
-                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-                RaycastHit hit;
+            if (body != null)
 
-                if (Physics.Raycast(ray, out hit))
+                if (IsDiceAtRest() && (Input.GetKeyDown(keyToRoll) || IsClickedOnSelf()))
                 {
-                    if (hit.collider.gameObject.name == gameObject.name)
-                    {
-                        RollDice();
-                    }
+                    RollDice();
                 }
-            }
         }
     }
 
